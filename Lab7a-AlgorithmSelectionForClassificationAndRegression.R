@@ -403,6 +403,7 @@ diabetes_model_lda <- lda(diabetes ~ ., data = pima_indians_diabetes_train)
 #### Display the model's details ----
 print(diabetes_model_lda)
 
+
 #### Make predictions ----
 predictions <- predict(diabetes_model_lda,
                        pima_indians_diabetes_test[, 1:8])$class
