@@ -1,234 +1,215 @@
----
-title: "Business Intelligence Project"
-author: "Team Champions"
-date: "| Date:30/10/2023"
-output:
-  github_document: 
-    toc: yes
-    toc_depth: 4
-    fig_width: 6
-    fig_height: 4
-    df_print: default
-editor_options:
-  chunk_output_type: console
----
+# *****************************************************************************
+# Lab 7.b.: Algorithm Selection for Clustering ----
+#
+# Course Code: BBT4206
+# Course Name: Business Intelligence II
+# Semester Duration: 21st August 2023 to 28th November 2023
+#
+# Lecturer: Allan Omondi
+# Contact: aomondi [at] strathmore.edu
+#
+# Note: The lecture contains both theory and practice. This file forms part of
+#       the practice. It has required lab work submissions that are graded for
+#       coursework marks.
+#
+# License: GNU GPL-3.0-or-later
+# See LICENSE file for licensing information.
+# *****************************************************************************
 
-# Student Details
+# **[OPTIONAL] Initialization: Install and use renv ----
+# The R Environment ("renv") package helps you create reproducible environments
+# for your R projects. This is helpful when working in teams because it makes
+# your R projects more isolated, portable and reproducible.
 
-|                                              |                  |
-|----------------------------------------------|------------------|
-| **Student ID Number**                        | 126761           |
-|                                              | 134111           |
-|                                              | 133996           |
-|                                              | 127707           |
-|                                              | 135859           |
-| **Student Name**                             | Virginia Wanjiru |
-|                                              | Immaculate Haayo |
-|                                              | Trevor Ngugi     |
-|                                              | Clarice Muthoni  |
-|                                              | Pauline Wairimu  |
-| **BBIT 4.2 Group**                           | B                |
-| **BI Project Group Name/ID (if applicable)** | Champions        |
+# Further reading:
+#   Summary: https://rstudio.github.io/renv/
+#   More detailed article: https://rstudio.github.io/renv/articles/renv.html
 
-# Setup Chunk
+# "renv" It can be installed as follows:
+# if (!is.element("renv", installed.packages()[, 1])) {
+# install.packages("renv", dependencies = TRUE,
+# repos = "https://cloud.r-project.org") # nolint
+# }
+# require("renv") # nolint
 
-**Note:** the following KnitR options have been set as the global defaults: <BR> `knitr::opts_chunk$set(echo = TRUE, warning = FALSE, eval = TRUE, collapse = FALSE, tidy = TRUE)`.
+# Once installed, you can then use renv::init() to initialize renv in a new
+# project.
 
-More KnitR options are documented here <https://bookdown.org/yihui/rmarkdown-cookbook/chunk-options.html> and here <https://yihui.org/knitr/options/>.
+# The prompt received after executing renv::init() is as shown below:
+# This project already has a lockfile. What would you like to do?
 
-```{r setup, include=FALSE}
-library(formatR)
-knitr::opts_chunk$set(
-  warning = FALSE,
-  collapse = FALSE
-)
+# 1: Restore the project from the lockfile.
+# 2: Discard the lockfile and re-initialize the project.
+# 3: Activate the project without snapshotting or installing any packages.
+# 4: Abort project initialization.
+
+# Select option 1 to restore the project from the lockfile
+# renv::init() # nolint
+
+# This will set up a project library, containing all the packages you are
+# currently using. The packages (and all the metadata needed to reinstall
+# them) are recorded into a lockfile, renv.lock, and a .Rprofile ensures that
+# the library is used every time you open the project.
+
+# Consider a library as the location where packages are stored.
+# Execute the following command to list all the libraries available in your
+# computer:
+.libPaths()
+
+# One of the libraries should be a folder inside the project if you are using
+# renv
+
+# Then execute the following command to see which packages are available in
+# each library:
+lapply(.libPaths(), list.files)
+
+# This can also be configured using the RStudio GUI when you click the project
+# file, e.g., "BBT4206-R.Rproj" in the case of this project. Then
+# navigate to the "Environments" tab and select "Use renv with this project".
+
+# As you continue to work on your project, you can install and upgrade
+# packages, using either:
+# install.packages() and update.packages or
+# renv::install() and renv::update()
+
+# You can also clean up a project by removing unused packages using the
+# following command: renv::clean()
+
+# After you have confirmed that your code works as expected, use
+# renv::snapshot(), AT THE END, to record the packages and their
+# sources in the lockfile.
+
+# Later, if you need to share your code with someone else or run your code on
+# a new machine, your collaborator (or you) can call renv::restore() to
+# reinstall the specific package versions recorded in the lockfile.
+
+# [OPTIONAL]
+# Execute the following code to reinstall the specific package versions
+# recorded in the lockfile (restart R after executing the command):
+# renv::restore() # nolint
+
+# [OPTIONAL]
+# If you get several errors setting up renv and you prefer not to use it, then
+# you can deactivate it using the following command (restart R after executing
+# the command):
+# renv::deactivate() # nolint
+
+# If renv::restore() did not install the "languageserver" package (required to
+# use R for VS Code), then it can be installed manually as follows (restart R
+# after executing the command):
 
 
-# STEP 1. Install and Load the Required Packages ----
-## stats ----
-if (require("stats")) {
-  require("stats")
+if (require("languageserver")) {
+  require("languageserver")
 } else {
-  install.packages("stats", dependencies = TRUE,
+  install.packages("languageserver", dependencies = TRUE,
                    repos = "https://cloud.r-project.org")
 }
 
-## mlbench ----
-if (require("mlbench")) {
-  require("mlbench")
-} else {
-  install.packages("mlbench", dependencies = TRUE,
-                   repos = "https://cloud.r-project.org")
-}
+# Introduction ----
+# Clustering is a type of unsupervised machine learning technique that aims to
+# group similar data points together into clusters or segments based on certain
+# characteristics or similarities, without the need for predefined labels or
+# target outcomes. In clustering, the goal is to discover hidden patterns or
+# structures in data and to create natural groupings of data points.
 
-## caret ----
-if (require("caret")) {
-  require("caret")
-} else {
-  install.packages("caret", dependencies = TRUE,
-                   repos = "https://cloud.r-project.org")
-}
+## Some Applications of Clustering ----
 
-## MASS ----
-if (require("MASS")) {
-  require("MASS")
-} else {
-  install.packages("MASS", dependencies = TRUE,
-                   repos = "https://cloud.r-project.org")
-}
+### 1. Customer segmentation ----
+# Grouping customers into segments with similar purchase behavior or
+# demographics.
 
-## glmnet ----
-if (require("glmnet")) {
-  require("glmnet")
-} else {
-  install.packages("glmnet", dependencies = TRUE,
-                   repos = "https://cloud.r-project.org")
-}
+### 2. Anomaly detection ----
+# Identifying unusual or outlier data points.
 
-## e1071 ----
-if (require("e1071")) {
-  require("e1071")
-} else {
-  install.packages("e1071", dependencies = TRUE,
-                   repos = "https://cloud.r-project.org")
-}
+### 3. Document categorization ----
+# Clustering documents based on their content to
+# discover topics or themes.
 
-## kernlab ----
-if (require("kernlab")) {
-  require("kernlab")
-} else {
-  install.packages("kernlab", dependencies = TRUE,
-                   repos = "https://cloud.r-project.org")
-}
+### 4. Image segmentation ----
+# Segmenting an image into different regions based on
+# color or texture.
 
-## rpart ----
-if (require("rpart")) {
-  require("rpart")
-} else {
-  install.packages("rpart", dependencies = TRUE,
-                   repos = "https://cloud.r-project.org")
-}
-```
+### 5. Genetic analysis ----
+# Clustering genes or proteins with similar functions.
 
-# Understanding the Structure of Data     
+# In R, there are several clustering algorithms you can use. The choice of
+# clustering algorithm depends on the nature of your data, the number of
+# clusters you want to find, and the specific requirements of your analysis.
 
-## Loading the Dataset
+## Popular clustering algorithms ----
 
-### Source:
+### 1. K-Means Clustering ----
+# K-means is a partitioning-based clustering algorithm that divides the data
+# into K non-overlapping clusters. It aims to minimize the sum of squared
+# distances from data points to the cluster center.
+# Example usage: kmeans_result <- kmeans(data, centers = K)
 
-The dataset that was used can be downloaded here: <https://drive.google.com/drive/folders/1-BGEhfOwquXF6KKXwcvrx7WuZXuqmW9q?usp=sharing>
+### 2. Hierarchical Clustering ----
+# Hierarchical clustering creates a hierarchy of clusters by repeatedly merging
+# or splitting existing clusters. It does not require specifying the number of
+# clusters in advance.
+# Example usage: hclust_result <- hclust(dist(data))
 
-### Reference:
+### 3. DBSCAN (Density-Based Spatial Clustering of Applications with Noise) ----
+# DBSCAN groups data points based on their density. It can discover clusters of
+# arbitrary shapes and identify outliers as noise.
+# Example usage: dbscan_result <- dbscan(data, eps = 0.5, minPts = 5)
 
-*\
-Refer to the APA 7th edition manual for rules on how to cite datasets: <https://apastyle.apa.org/style-grammar-guidelines/references/examples/data-set-references>*
-##### Linear Regression 
-```{r Linear Regression}
+### 4. Agglomerative Clustering ----
+# Agglomerative clustering is a hierarchical clustering algorithm that starts
+# with individual data points as clusters and merges them gradually.
+# Example usage: agnes_result <- agnes(data)
 
+### 5. OPTICS (Ordering Points To Identify the Clustering Structure) ----
+# OPTICS is a density-based clustering algorithm that provides a visualization
+# of the cluster structure of the data.
 
-```
-##### Logistic Regression without caret
-```{r Carry out Logistic Regression}
+### 6. Gaussian Mixture Models (GMM) ----
+# GMM is a probabilistic model that assumes that the data is generated from a
+# mixture of several Gaussian distributions.
+# Example usage: gmm_result <- Mclust(data)
 
-## 2. Logistic Regression ----
-### 2.a. Logistic Regression without caret ----
-# The glm() function is in the stats package and creates a
-# generalized linear model for regression or classification.
-# It can be configured to perform a logistic regression suitable for BINARY
-# classification problems.
+# The choice of clustering algorithm depends on factors such as data
+# distribution, the number of clusters, noise tolerance, and the problem you
+# are trying to solve. It is often a good practice to try multiple algorithms
+# and assess their results to determine the best approach for your specific
+# data and objectives.
 
-#### Load and split the dataset ----
-library(readr)
-chest_disease <- read_csv("../data/chest_disease.csv")
+## Performance Metrics for Clustering ----
+# Given that clustering is unsupervised learning and it does not use labeled
+# data, we cannot calculate performance metrics like accuracy, Cohen's Kappa,
+# AUC, LogLoss, RMSE, R squared, etc., to compare different algorithms and
+# their models. As a result, assessing the performance of clustering models
+# is challenging and subjective.
 
+# The subjective assessment involves determining whether the clustering model
+# is interpretable, whether the output of the clustering model is useful, and
+# whether the clustering model has led to the discovery of new patterns in the
+# data.
 
+## The K-Means Clustering Algorithm ----
+# The K-Means clustering algorithm is a popular algorithm for clustering tasks
+# because of its intuition and ease of implementation.
 
-# Define a 70:30 train:test data split of the dataset.
-train_index <- createDataPartition(chest_disease$Outcome,
-                                   p = 0.7,
-                                   list = FALSE)
-chest_disease_train <- chest_disease[train_index, ]
-chest_disease_test <- chest_disease[-train_index, ]
+# K-Means is a centroid-based algorithm where the ML Engineer must define the
+# required number of clusters to be created. The number of clusters can be
+# informed by the business use-case or through trial and error.
 
-#### Train the model ----
+### Steps in K-Means Clustering ----
+#     1. Choose the number of clusters, k.
+#     2. Select k points (clusters of size 1) at random. These are referred to
+#        as the centroids.
+#     3. Calculate the distance between each point and the centroid and assign
+#        each data point to the closest centroid.
+#     4. Calculate the centroid (mean position) for each cluster based on the
+#        assigned data points. This will change the position of the centroid.
+#     5. Repeat steps 3–4 until the clusters do not change or until the
+#        maximum number of iterations is reached.
 
-chest_disease_model_glm <- glm(Outcome ~ ., data = chest_disease_train,
-                            family = binomial(link = "logit"))
-
-#### Display the model's details ----
-print(chest_disease_model_glm)
-
-#### Make predictions ----
-probabilities <- predict(chest_disease_model_glm, chest_disease_test[, 1:8],
-                         type = "response")
-print(probabilities)
-predictions <- ifelse(probabilities > 0.5, "Yes", "No")
-print(predictions)
-
-#### Display the model's evaluation metrics ----
-table(predictions, chest_disease_test$Outcome)
-
-# Read the following article on how to compute various evaluation metrics using
-# the confusion matrix:
-# https://en.wikipedia.org/wiki/Confusion_matrix
+# Watch the following video: https://youtu.be/4b5d3muPQmA?si=7F9d2A6_MlqSsag2
 
 
-
-
-```
-
-##### Logistic Regression with caret
-```{r Carry out Logistic Regression with caret}
-
-library(readr)
-chest_disease <- read_csv("../data/chest_disease.csv")
-View(chest_disease)
-
-# Define a 70:30 train:test data split of the dataset.
-train_index <- createDataPartition(chest_disease$Outcome,
-                                   p = 0.7,
-                                   list = FALSE)
-chest_disease_train <- chest_disease[train_index, ]
-chest_disease_test <- chest_disease[-train_index, ]
-
-#### Train the model ----
-# We apply the 5-fold cross validation resampling method
-
-train_control <- trainControl(method = "cv", number = 5)
-# We can use "regLogistic" instead of "glm"
-# Notice the data transformation applied when we call the train function
-# in caret, i.e., a standardize data transform (centre + scale)
-set.seed(7)
-
-chest_disease_caret_model_logistic <-
-  train(Outcome ~ ., data = chest_disease_train,
-        method = "glm", metric = "RMSE",
-        preProcess = c("center", "scale"), trControl = train_control)
-
-#### Display the model's details ----
-print(chest_disease_caret_model_logistic)
-
-#### Make predictions ----
-predictions <- predict(chest_disease_caret_model_logistic,
-                       chest_disease_test[, 1:8])
-predictions<-as.factor(chest_disease_test$Outcome)
-
-#### Display the model's evaluation metrics ----
-confusion_matrix <-
-  caret::confusionMatrix(predictions,
-                         as.factor(chest_disease_test[, 1:9]$Outcome))
-print(confusion_matrix)
-
-fourfoldplot(as.table(confusion_matrix), color = c("grey", "lightblue"),
-             main = "Confusion Matrix")
-
-```
-
-
-
-# Clustering
-
-```{r Carry Out Clustering}
 # STEP 1. Install and Load the Required Packages ----
 ## readr ----
 if (require("readr")) {
@@ -288,11 +269,11 @@ if (require("dplyr")) {
 
 # STEP 2. Load the Dataset ----
 library(readr)
-train <- read_csv("../data/train.csv")
+train <- read_csv("data/train.csv")
 View(train)
 
 train <-
-  read_csv("../data/train.csv",
+  read_csv("data/train.csv",
            col_types =
              cols(ID = col_double(),
                   Gender = col_character(),
@@ -535,18 +516,3 @@ ggplot(train_removed_obs,
 # The results of clustering, i.e., a label of the cluster can be fed as input
 # to a supervised learning algorithm. The trained model can then be used to
 # predict the cluster that a new observation will belong to.
-
-
-
-
-```
-# Association
-
-```{r Carrying out association}
-
-
-
-
-```
-
-
