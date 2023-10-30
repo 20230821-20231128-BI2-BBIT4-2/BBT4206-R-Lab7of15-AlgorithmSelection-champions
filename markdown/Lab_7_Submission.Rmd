@@ -1,7 +1,7 @@
 ---
 title: "Business Intelligence Project"
-author: "<Champions>"
-date: "<15/10/2023>"
+author: "Team Champions"
+date: "| Date:30/10/2023"
 output:
   github_document: 
     toc: yes
