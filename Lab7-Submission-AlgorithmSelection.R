@@ -197,39 +197,41 @@ if (require("rpart")) {
 # model using ordinary least squares (OLS).
 
 #### Load and split the dataset ----
-data(BostonHousing)
+library(readr)
+chest_disease <- read_csv("data/chest_disease.csv")
+View(chest_disease)
 
 # Define an 80:20 train:test data split of the dataset.
-train_index <- createDataPartition(BostonHousing$medv,
+train_index <- createDataPartition(chest_disease$Outcome,
                                    p = 0.8,
                                    list = FALSE)
-boston_housing_train <- BostonHousing[train_index, ]
-boston_housing_test <- BostonHousing[-train_index, ]
+chest_disease_train <- chest_disease[train_index, ]
+chest_disease_test <- chest_disease[-train_index, ]
 
 #### Train the model ----
-boston_housing_model_lm <- lm(medv ~ ., boston_housing_train)
+chest_disease_model_lm <- lm(Outcome ~ ., chest_disease_train)
 
 #### Display the model's details ----
-print(boston_housing_model_lm)
+print(chest_disease_model_lm)
 
 #### Make predictions ----
-predictions <- predict(boston_housing_model_lm, boston_housing_test[, 1:13])
+predictions <- predict(chest_disease_model_lm, chest_disease_test[, 1:8])
 
 #### Display the model's evaluation metrics ----
 ##### RMSE ----
-rmse <- sqrt(mean((boston_housing_test$medv - predictions)^2))
+rmse <- sqrt(mean((chest_disease_test$Outcome - predictions)^2))
 print(paste("RMSE =", sprintf(rmse, fmt = "%#.4f")))
 
 ##### SSR ----
 # SSR is the sum of squared residuals (the sum of squared differences
 # between observed and predicted values)
-ssr <- sum((boston_housing_test$medv - predictions)^2)
+ssr <- sum((chest_disease_test$Outcome - predictions)^2)
 print(paste("SSR =", sprintf(ssr, fmt = "%#.4f")))
 
 ##### SST ----
 # SST is the total sum of squares (the sum of squared differences
 # between observed values and their mean)
-sst <- sum((boston_housing_test$medv - mean(boston_housing_test$medv))^2)
+sst <- sum((chest_disease_test$Outcome - mean(chest_disease_test$Outcome))^2)
 print(paste("SST =", sprintf(sst, fmt = "%#.4f")))
 
 ##### R Squared ----
@@ -245,20 +247,23 @@ print(paste("R Squared =", sprintf(r_squared, fmt = "%#.4f")))
 # interpret. For example, if you are predicting the amount paid in rent,
 # and the MAE is KES. 10,000, it means, on average, your model's predictions
 # are off by about KES. 10,000.
-absolute_errors <- abs(predictions - boston_housing_test$medv)
+absolute_errors <- abs(predictions - chest_disease_test$Outcome)
 mae <- mean(absolute_errors)
 print(paste("MAE =", sprintf(mae, fmt = "%#.4f")))
 
+
 ### 1.b. Linear Regression using Ordinary Least Squares with caret ----
 #### Load and split the dataset ----
-data(BostonHousing)
+library(readr)
+chest_disease <- read_csv("data/chest_disease.csv")
+
 
 # Define an 80:20 train:test data split of the dataset.
-train_index <- createDataPartition(BostonHousing$medv,
+train_index <- createDataPartition(chest_disease$Outcome,
                                    p = 0.8,
                                    list = FALSE)
-boston_housing_train <- BostonHousing[train_index, ]
-boston_housing_test <- BostonHousing[-train_index, ]
+chest_disease_train <- chest_disease[train_index, ]
+chest_disease_test <- chest_disease[-train_index, ]
 
 #### Train the model ----
 #cv= cross validation resampling method
@@ -267,33 +272,33 @@ boston_housing_test <- BostonHousing[-train_index, ]
 
 set.seed(7)
 train_control <- trainControl(method = "cv", number = 5)
-boston_housing_caret_model_lm <- train(medv ~ ., data = boston_housing_train,
+chest_disease_caret_model_lm <- train(Outcome ~ ., data = chest_disease_train,
                                        method = "lm", metric = "RMSE",
                                        preProcess = c("center", "scale"),
                                        trControl = train_control)
 
 #### Display the model's details ----
-print(boston_housing_caret_model_lm)
+print(chest_disease_caret_model_lm)
 
 #### Make predictions ----
-predictions <- predict(boston_housing_caret_model_lm,
-                       boston_housing_test[, 1:13])
+predictions <- predict(chest_disease_caret_model_lm,
+                       chest_disease_test[, 1:8])
 
 #### Display the model's evaluation metrics ----
 ##### RMSE ----
-rmse <- sqrt(mean((boston_housing_test$medv - predictions)^2))
+rmse <- sqrt(mean((chest_disease_test$Outcome - predictions)^2))
 print(paste("RMSE =", sprintf(rmse, fmt = "%#.4f")))
 
 ##### SSR ----
 # SSR is the sum of squared residuals (the sum of squared differences
 # between observed and predicted values)
-ssr <- sum((boston_housing_test$medv - predictions)^2)
+ssr <- sum((chest_disease_test$Outcome - predictions)^2)
 print(paste("SSR =", sprintf(ssr, fmt = "%#.4f")))
 
 ##### SST ----
 # SST is the total sum of squares (the sum of squared differences
 # between observed values and their mean)
-sst <- sum((boston_housing_test$medv - mean(boston_housing_test$medv))^2)
+sst <- sum((chest_disease_test$Outcome - mean(chest_disease_test$Outcome))^2)
 print(paste("SST =", sprintf(sst, fmt = "%#.4f")))
 
 ##### R Squared ----
@@ -309,7 +314,7 @@ print(paste("R Squared =", sprintf(r_squared, fmt = "%#.4f")))
 # interpret. For example, if you are predicting the amount paid in rent,
 # and the MAE is KES. 10,000, it means, on average, your model's predictions
 # are off by about KES. 10,000.
-absolute_errors <- abs(predictions - boston_housing_test$medv)
+absolute_errors <- abs(predictions - chest_disease_test$Outcome)
 mae <- mean(absolute_errors)
 print(paste("MAE =", sprintf(mae, fmt = "%#.4f")))
 
@@ -399,34 +404,36 @@ print(confusion_matrix)
 fourfoldplot(as.table(confusion_matrix), color = c("grey", "lightblue"),
              main = "Confusion Matrix")
 
-## 3. Linear Discriminant Analysis ----
+## 3. LINEAR DICRIMINANT ANALYSIS ----
 ### 3.a. Linear Discriminant Analysis without caret ----
 # The lda() function is in the MASS package and creates a linear model of a
 # multi-class classification problem.
 
 #### Load and split the dataset ----
-data(PimaIndiansDiabetes)
+library(readr)
+rop_recommendation <- read_csv("data/Crop_recommendation.csv")
+View(Crop_recommendation)
 
 # Define a 70:30 train:test data split of the dataset.
-train_index <- createDataPartition(PimaIndiansDiabetes$diabetes,
+train_index <- createDataPartition(Crop_recommendation$label,
                                    p = 0.7,
                                    list = FALSE)
-pima_indians_diabetes_train <- PimaIndiansDiabetes[train_index, ]
-pima_indians_diabetes_test <- PimaIndiansDiabetes[-train_index, ]
+Crop_recommendation_train <- Crop_recommendation[train_index, ]
+Crop_recommendation_test <- Crop_recommendation[-train_index, ]
 
 #### Train the model ----
-diabetes_model_lda <- lda(diabetes ~ ., data = pima_indians_diabetes_train)
+Crop_recommendation_model_lda <- lda(label ~ ., data = Crop_recommendation_train)
 
 #### Display the model's details ----
-print(diabetes_model_lda)
+print(Crop_recommendation_model_lda)
 
 
 #### Make predictions ----
-predictions <- predict(diabetes_model_lda,
-                       pima_indians_diabetes_test[, 1:8])$class
+predictions <- predict(Crop_recommendation_model_lda,
+                       Crop_recommendation_test[, 1:7])$class
 
 #### Display the model's evaluation metrics ----
-table(predictions, pima_indians_diabetes_test$diabetes)
+table(predictions, Crop_recommendation_test$label)
 
 # Read the following article on how to compute various evaluation metrics using
 # the confusion matrix:
@@ -434,14 +441,15 @@ table(predictions, pima_indians_diabetes_test$diabetes)
 
 ### 3.b.  Linear Discriminant Analysis with caret ----
 #### Load and split the dataset ----
-data(PimaIndiansDiabetes)
+library(readr)
+Crop_recommendation <- read_csv("data/Crop_recommendation.csv")
 
 # Define a 70:30 train:test data split of the dataset.
-train_index <- createDataPartition(PimaIndiansDiabetes$diabetes,
+train_index <- createDataPartition(Crop_recommendation$label,
                                    p = 0.7,
                                    list = FALSE)
-pima_indians_diabetes_train <- PimaIndiansDiabetes[train_index, ]
-pima_indians_diabetes_test <- PimaIndiansDiabetes[-train_index, ]
+Crop_recommendation_train <- Crop_recommendation[train_index, ]
+Crop_recommendation_test <- Crop_recommendation[-train_index, ]
 
 #### Train the model ----
 set.seed(7)
@@ -450,26 +458,27 @@ set.seed(7)
 train_control <- trainControl(method = "LOOCV")
 # We also apply a standardize data transform to make the mean = 0 and
 # standard deviation = 1
-diabetes_caret_model_lda <- train(diabetes ~ .,
-                                  data = pima_indians_diabetes_train,
+Crop_recommendation_caret_model_lda <- train(label ~ .,
+                                  data = Crop_recommendation_train,
                                   method = "lda", metric = "Accuracy",
                                   preProcess = c("center", "scale"),
                                   trControl = train_control)
 
 #### Display the model's details ----
-print(diabetes_caret_model_lda)
+print(Crop_recommendation_caret_model_lda)
 
 #### Make predictions ----
-predictions <- predict(diabetes_caret_model_lda,
-                       pima_indians_diabetes_test[, 1:8])
+predictions <- predict(Crop_recommendation_caret_model_lda,
+                       Crop_recommendation_test[, 1:7])
+predictions<-as.factor(Crop_recommendation$label)
 
 #### Display the model's evaluation metrics ----
 confusion_matrix <-
   caret::confusionMatrix(predictions,
-                         pima_indians_diabetes_test[, 1:9]$diabetes)
+                         Crop_recommendation_test[, 1:8]$label)
 print(confusion_matrix)
 
-fourfoldplot(as.table(confusion_matrix), color = c("grey", "lightblue"),
+fourfoldplot(as.table(confusion_matrix), color = c("green", "red"),
              main = "Confusion Matrix")
 
 ## 4. Regularized Linear Regression ----
@@ -483,40 +492,46 @@ fourfoldplot(as.table(confusion_matrix), color = c("grey", "lightblue"),
 
 ### 4.a. Regularized Linear Regression Classification Problem without CARET ----
 #### Load the dataset ----
-data(PimaIndiansDiabetes)
-x <- as.matrix(PimaIndiansDiabetes[, 1:8])
-y <- as.matrix(PimaIndiansDiabetes[, 9])
+library(readr)
+chest_disease <- read_csv("data/chest_disease.csv")
+View(chest_disease)
+
+
+x <- as.matrix(chest_disease[, 1:8])
+y <- as.matrix(chest_disease[, 9])
 
 #### Train the model ----
-diabetes_model_glm <- glmnet(x, y, family = "binomial",
+chest_disease_model_glm <- glmnet(x, y, family = "binomial",
                              alpha = 0.5, lambda = 0.001)
 
 #### Display the model's details ----
-print(diabetes_model_glm)
+print(chest_disease_model_glm)
 
 #### Make predictions ----
-predictions <- predict(diabetes_model_glm, x, type = "class")
+predictions <- predict(chest_disease_model_glm, x, type = "class")
 
 #### Display the model's evaluation metrics ----
-table(predictions, PimaIndiansDiabetes$diabetes)
+table(predictions, chest_disease$Outcome)
 
 ### 4.b. Regularized Linear Regression Regression Problem without CARET ----
 #### Load the dataset ----
-data(BostonHousing)
-BostonHousing$chas <- # nolint: object_name_linter.
-  as.numeric(as.character(BostonHousing$chas))
-x <- as.matrix(BostonHousing[, 1:13])
-y <- as.matrix(BostonHousing[, 14])
+library(readr)
+chest_disease <- read_csv("data/chest_disease.csv")
+View(chest_disease)
+
+
+x <- as.matrix(chest_disease[, 1:8])
+y <- as.matrix(chest_disease[, 9])
 
 #### Train the model ----
-boston_housing_model_glm <- glmnet(x, y, family = "gaussian",
+chest_disease_model_glm <- glmnet(x, y, family = "gaussian",
                                    alpha = 0.5, lambda = 0.001)
 
 #### Display the model's details ----
-print(boston_housing_model_glm)
+print(chest_disease_model_glm)
 
 #### Make predictions ----
-predictions <- predict(boston_housing_model_glm, x, type = "link")
+predictions <- predict(chest_disease_model_glm, x, type = "link")
 
 #### Display the model's evaluation metrics ----
 mse <- mean((y - predictions)^2)
@@ -544,81 +559,105 @@ print(paste("MAE =", sprintf(mae, fmt = "%#.4f")))
 
 ### 4.c. Regularized Linear Regression Classification Problem with CARET ----
 #### Load and split the dataset ----
-data(PimaIndiansDiabetes)
+
+library(readr)
+chest_disease <- read_csv("data/chest_disease.csv")
 
 # Define a 70:30 train:test data split of the dataset.
-train_index <- createDataPartition(PimaIndiansDiabetes$diabetes,
+train_index <- createDataPartition(chest_disease$Outcome,
                                    p = 0.7,
                                    list = FALSE)
-pima_indians_diabetes_train <- PimaIndiansDiabetes[train_index, ]
-pima_indians_diabetes_test <- PimaIndiansDiabetes[-train_index, ]
+chest_disease_train <- chest_disease[train_index, ]
+chest_disease_test <- chest_disease[-train_index, ]
 
 #### Train the model ----
 # We apply the 5-fold cross validation resampling method
 set.seed(7)
 train_control <- trainControl(method = "cv", number = 5)
-diabetes_caret_model_glmnet <-
-  train(diabetes ~ ., data = pima_indians_diabetes_train,
-        method = "glmnet", metric = "Accuracy",
+
+chest_disease_caret_model_glmnet <-
+  train(Outcome ~ ., data = chest_disease_train,
+        method = "glmnet", metric = "RMSE",
         preProcess = c("center", "scale"), trControl = train_control)
 
 #### Display the model's details ----
-print(diabetes_caret_model_glmnet)
+print(chest_disease_caret_model_glmnet)
 
 #### Make predictions ----
-predictions <- predict(diabetes_caret_model_glmnet,
-                       pima_indians_diabetes_test[, 1:8])
+predictions <- predict(chest_disease_caret_model_glmnet,
+                       chest_disease_test[, 1:8])
+
+chest_disease_test[, 1:9]$Outcome <- factor(chest_disease_test[, 1:9]$Outcome, levels = levels(predictions))
+
+levels(predictions)
+levels(chest_disease_test[, 1:9]$Outcome)
+
 
 #### Display the model's evaluation metrics ----
 confusion_matrix <-
   caret::confusionMatrix(predictions,
-                         pima_indians_diabetes_test[, 1:9]$diabetes)
+                         chest_disease_test[, 1:9]$Outcome)
 print(confusion_matrix)
 
-fourfoldplot(as.table(confusion_matrix), color = c("grey", "lightblue"),
-             main = "Confusion Matrix")
+heatmap <- ggplot(data=confusion_matrix, aes(x = Reference, y = Prediction, fill = Freq)) +
+  geom_tile() +
+  geom_text(aes(label = Freq), vjust = 1) +
+  scale_fill_gradient(low = "white", high = "blue") +
+  labs(title = "Confusion Matrix") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Display the heatmap
+print(heatmap)
+
+
 
 ### 4.d. Regularized Linear Regression Regression Problem with CARET ----
 #### Load and split the dataset ----
-data(BostonHousing)
+library(readr)
+chest_disease <- read_csv("data/chest_disease.csv")
+View(chest_disease)
 
 # Define a 70:30 train:test data split of the dataset.
-train_index <- createDataPartition(BostonHousing$medv,
+train_index <- createDataPartition(chest_disease$Outcome,
                                    p = 0.7,
                                    list = FALSE)
-boston_housing_train <- BostonHousing[train_index, ]
-boston_housing_test <- BostonHousing[-train_index, ]
+chest_disease_train <- chest_disease[train_index, ]
+chest_disease_test <- chest_disease[-train_index, ]
 
 #### Train the model ----
 set.seed(7)
 train_control <- trainControl(method = "cv", number = 5)
-housing_caret_model_glmnet <-
-  train(medv ~ .,
-        data = boston_housing_train, method = "glmnet",
+
+
+chest_disease_caret_model_glmnet <-
+  train(Outcome ~ .,
+        data = chest_disease_train, method = "glmnet",
         metric = "RMSE", preProcess = c("center", "scale"),
         trControl = train_control)
 
+
 #### Display the model's details ----
-print(housing_caret_model_glmnet)
+print(chest_disease_caret_model_glmnet)
 
 #### Make predictions ----
-predictions <- predict(housing_caret_model_glmnet, boston_housing_test[, 1:13])
+predictions <- predict(chest_disease_caret_model_glmnet, chest_disease_test[, 1:8])
 
 #### Display the model's evaluation metrics ----
 ##### RMSE ----
-rmse <- sqrt(mean((boston_housing_test$medv - predictions)^2))
+rmse <- sqrt(mean((chest_disease_test$Outcome - predictions)^2))
 print(paste("RMSE =", sprintf(rmse, fmt = "%#.4f")))
 
 ##### SSR ----
 # SSR is the sum of squared residuals (the sum of squared differences
 # between observed and predicted values)
-ssr <- sum((boston_housing_test$medv - predictions)^2)
+ssr <- sum((chest_disease_test$Outcome - predictions)^2)
 print(paste("SSR =", sprintf(ssr, fmt = "%#.4f")))
 
 ##### SST ----
 # SST is the total sum of squares (the sum of squared differences
 # between observed values and their mean)
-sst <- sum((boston_housing_test$medv - mean(boston_housing_test$medv))^2)
+sst <- sum((chest_disease_test$Outcome - mean(chest_disease_test$Outcomel))^2)
 print(paste("SST =", sprintf(sst, fmt = "%#.4f")))
 
 ##### R Squared ----
@@ -632,9 +671,28 @@ print(paste("R Squared =", sprintf(r_squared, fmt = "%#.4f")))
 # interpret. For example, if you are predicting the amount paid in rent,
 # and the MAE is KES. 10,000, it means, on average, your model's predictions
 # are off by about KES. 10,000.
-absolute_errors <- abs(predictions - boston_housing_test$medv)
+# Convert the factors to character for comparison
+predictions_char <- as.character(predictions)
+actual_outcome_char <- as.character(chest_disease$Outcome)
+
+# Compare the predicted values with the actual values
+correct_predictions <- sum(predictions_char == actual_outcome_char)
+incorrect_predictions <- sum(predictions_char != actual_outcome_char)
+
+cat("Correct predictions:", correct_predictions, "\n")
+cat("Incorrect predictions:", incorrect_predictions, "\n")
+
+
 mae <- mean(absolute_errors)
 print(paste("MAE =", sprintf(mae, fmt = "%#.4f")))
+
+
+
+
+
+
+
+
 
 # B. Non-Linear Algorithms ----
 ## 1.  Classification and Regression Trees ----
