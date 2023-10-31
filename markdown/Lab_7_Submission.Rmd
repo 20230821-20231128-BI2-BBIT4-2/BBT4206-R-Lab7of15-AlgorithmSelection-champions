@@ -657,8 +657,12 @@ actual_outcome_char <- as.character(chest_disease$Outcome)
 correct_predictions <- sum(predictions_char == actual_outcome_char)
 incorrect_predictions <- sum(predictions_char != actual_outcome_char)
 
+
+
 cat("Correct predictions:", correct_predictions, "\n")
 cat("Incorrect predictions:", incorrect_predictions, "\n")
+
+
 
 
 mae <- mean(absolute_errors)
