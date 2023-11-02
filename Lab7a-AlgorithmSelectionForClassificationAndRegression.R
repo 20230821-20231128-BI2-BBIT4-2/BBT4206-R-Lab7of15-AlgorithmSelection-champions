@@ -847,6 +847,7 @@ train_index <- createDataPartition(PimaIndiansDiabetes$diabetes,
 pima_indians_diabetes_train <- PimaIndiansDiabetes[train_index, ]
 pima_indians_diabetes_test <- PimaIndiansDiabetes[-train_index, ]
 
+
 #### Train the model ----
 # We apply the 5-fold cross validation resampling method
 set.seed(7)
@@ -959,9 +960,7 @@ train_index <- createDataPartition(PimaIndiansDiabetes$diabetes,
                                    p = 0.7,
                                    list = FALSE)
 pima_indians_diabetes_train <- PimaIndiansDiabetes[train_index, ]
-pima_indians_diabetes_test <- PimaIndiansDiabetes[-train_index, ]
-
-#### Train the model ----
+pima_indians_diabetes_test <- PimaIndiansDiabetes[-train_index, ]#### Train the model ----
 # We apply the 10-fold cross validation resampling method
 # We also apply the standardize data transform
 set.seed(7)
@@ -995,6 +994,7 @@ data(BostonHousing)
 train_index <- createDataPartition(BostonHousing$medv,
                                    p = 0.8,
                                    list = FALSE)
+
 boston_housing_train <- BostonHousing[train_index, ]
 boston_housing_test <- BostonHousing[-train_index, ]
 
@@ -1145,6 +1145,7 @@ train_index <- createDataPartition(PimaIndiansDiabetes$diabetes,
                                    list = FALSE)
 pima_indians_diabetes_train <- PimaIndiansDiabetes[train_index, ]
 pima_indians_diabetes_test <- PimaIndiansDiabetes[-train_index, ]
+
 
 #### Train the model ----
 set.seed(7)

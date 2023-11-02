@@ -249,6 +249,21 @@ if (require("ggcorrplot")) {
                    repos = "https://cloud.r-project.org")
 }
 
+## caret ----
+if (require("caret")) {
+  require("caret")
+} else {
+  install.packages("caret", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+## dplyr ----
+if (require("dplyr")) {
+  require("dplyr")
+} else {
+  install.packages("dplyr", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
 # STEP 2. Load the Dataset ----
 # Source: http://insideairbnb.com/cape-town/
 # Save the dataset as "listings_summary_cape_town.csv" inside the data folder
@@ -293,6 +308,7 @@ summary(airbnb_cape_town)
 # STEP 3. Check for Missing Data and Address it ----
 # Are there missing values in the dataset?
 any_na(airbnb_cape_town)
+
 
 # How many?
 n_miss(airbnb_cape_town)
@@ -398,6 +414,7 @@ p <- ggplot2::ggplot(data = reshape2::melt(corr_matrix),
                      size = 4) +
   ggplot2::theme_minimal() +
   ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
+
 
 ggcorrplot(corr_matrix, hc.order = TRUE, type = "lower", lab = TRUE)
 

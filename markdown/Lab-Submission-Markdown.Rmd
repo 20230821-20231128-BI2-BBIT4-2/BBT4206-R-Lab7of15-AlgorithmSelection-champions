@@ -1,0 +1,790 @@
+---
+title: "Business Intelligence Project"
+author: "<Champions>"
+date: "<22/10/2023>"
+output:
+  github_document: 
+    toc: yes
+    toc_depth: 4
+    fig_width: 6
+    fig_height: 4
+    df_print: default
+editor_options:
+  chunk_output_type: console
+---
+
+# Student Details
+
++----------------------------------------------+-----------------------+
+| **Student ID Number**                        | 134111                |
+|                                              |                       |
+|                                              | 133996                |
+|                                              |                       |
+|                                              | 126761                |
+|                                              |                       |
+|                                              | 135859                |
+|                                              |                       |
+|                                              | 127707                |
++----------------------------------------------+-----------------------+
+| **Student Name**                             | Juma Immaculate Haayo |
+|                                              |                       |
+|                                              | Trevor Ngugi          |
+|                                              |                       |
+|                                              | Virginia Wanjiru      |
+|                                              |                       |
+|                                              | Pauline Wang'ombe     |
+|                                              |                       |
+|                                              | Clarice Gitonga       |
++----------------------------------------------+-----------------------+
+| **BBIT 4.2 Group**                           | B                     |
++----------------------------------------------+-----------------------+
+| **BI Project Group Name/ID (if applicable)** | Champions             |
++----------------------------------------------+-----------------------+
+
+# Setup Chunk
+
+**Note:** the following KnitR options have been set as the global defaults: <BR> `knitr::opts_chunk$set(echo = TRUE, warning = FALSE, eval = TRUE, collapse = FALSE, tidy = TRUE)`.
+
+More KnitR options are documented here <https://bookdown.org/yihui/rmarkdown-cookbook/chunk-options.html> and here <https://yihui.org/knitr/options/>.
+
+# STEP 1 :  Install and Load the Required Packages
+We installed all the packages that will enable us execute this lab.
+```{r Your 1st Code Chunk}
+## stats ----
+if (require("stats")) {
+  require("stats")
+} else {
+  install.packages("stats", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## mlbench ----
+if (require("mlbench")) {
+  require("mlbench")
+} else {
+  install.packages("mlbench", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## caret ----
+if (require("caret")) {
+  require("caret")
+} else {
+  install.packages("caret", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## MASS ----
+if (require("MASS")) {
+  require("MASS")
+} else {
+  install.packages("MASS", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## glmnet ----
+if (require("glmnet")) {
+  require("glmnet")
+} else {
+  install.packages("glmnet", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## e1071 ----
+if (require("e1071")) {
+  require("e1071")
+} else {
+  install.packages("e1071", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## kernlab ----
+if (require("kernlab")) {
+  require("kernlab")
+} else {
+  install.packages("kernlab", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## rpart ----
+if (require("rpart")) {
+  require("rpart")
+} else {
+  install.packages("rpart", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+```
+
+## Load the datasets
+We proceeded to load the ToothGrowth dataset which is inbult
+
+```{r Your 2nd Code Chunk}
+data(ToothGrowth)
+View(ToothGrowth)
+
+```
+
+# Algorithm Selection for Classification 
+# A. Linear Algorithms 
+## 1. Linear Discriminant Analysis
+### 1.a. Linear Discriminant Analysis without caret
+
+70% of the dataset is used in training the dataset and 30% for testing.
+```{r Your 3rd Code Chunk}
+train_index <- createDataPartition(ToothGrowth$supp,
+                                   p = 0.7,
+                                   list = FALSE)
+ToothGrowth_train <- ToothGrowth[train_index, ]
+ToothGrowth_test <- ToothGrowth[-train_index, ]
+
+```
+
+####Train the model
+```{r Your 4th Code Chunk}
+ToothGrowth_model_lda <- lda(supp ~ ., data = ToothGrowth_train)
+
+```
+
+#### Display the model's details
+```{r Your 5th Code Chunk}
+print(ToothGrowth_model_lda)
+
+```
+
+
+#### Make predictions
+```{r Your 6th Code Chunk}
+predictions <- predict(ToothGrowth_model_lda,
+                       ToothGrowth_test[, 1:3])$class
+
+```
+
+#### Display the model's evaluation metrics
+The result of running the code below is 7 for OJ to OJ and 8 for VC to VC
+
+```{r Your 7th Code Chunk}
+
+table(predictions, ToothGrowth_test$supp)
+```
+
+### 1.b. Linear Discriminant Analysis with caret
+70% of the dataset is used in training the dataset and 30% for testing.
+
+```{r Your 8th Code Chunk}
+train_index <- createDataPartition(ToothGrowth$supp,
+                                   p = 0.7,
+                                   list = FALSE)
+ToothGrowth_train <- ToothGrowth[train_index, ]
+ToothGrowth_test <- ToothGrowth[-train_index, ]
+
+```
+
+#### Train the model
+We apply a Leave One Out Cross Validation resampling method
+We also apply a standardize data transform to make the mean = 0 and
+ standard deviation = 1
+ 
+```{r Your 9th Code Chunk}
+set.seed(7)
+train_control <- trainControl(method = "LOOCV")
+ToothGrowth_caret_model_lda <- train(supp ~ .,
+                                     data = ToothGrowth_train,
+                                     method = "lda", metric = "Accuracy",
+                                     preProcess = c("center", "scale"),
+                                     trControl = train_control)
+
+```
+
+#### Display the model's details
+
+```{r Your 10th Code Chunk}
+print(ToothGrowth_caret_model_lda)
+
+```
+
+#### Make predictions 
+```{r Your 11th Code Chunk}
+predictions <- predict(ToothGrowth_caret_model_lda,
+                       ToothGrowth_test[, 1:3])
+                                    
+
+```
+
+
+#### Display the model's evaluation metrics
+Here, the model's evaluation is displayed on a Confusion Matrix.
+```{r Your 12th Code Chunk}
+confusion_matrix <-
+  caret::confusionMatrix(predictions,
+                         ToothGrowth_test[, 1:2]$supp)
+print(confusion_matrix)
+
+fourfoldplot(as.table(confusion_matrix), color = c("grey", "lightblue"),
+             main = "Confusion Matrix")
+```
+
+##2. Regularized Linear Regression ----
+### 2.a. Regularized Linear Regression Classification Problem with CARET ----
+#### Load and split the dataset 
+We loaded the ToothGrowth dataset which is inbuilt
+
+```{r Your 13th Code Chunk}
+data(ToothGrowth)
+
+```
+
+
+####Split the datset into training and testing
+70% of the datset is used for training and the other 30% is used for testing
+
+```{r Your 14th Code Chunk}
+train_index <- createDataPartition(ToothGrowth$supp,
+                                   p = 0.7,
+                                   list = FALSE)
+ToothGrowth_regression_train <- ToothGrowth[train_index, ]
+ToothGrowth_regression_test <- ToothGrowth[-train_index, ]
+
+```
+
+#### Train the model
+Apply the 5-fold cross validation resampling method
+```{r Your 15th Code Chunk}
+set.seed(7)
+train_control <- trainControl(method = "cv", number = 5)
+ToothGrowth_caret_model_glmnet <-
+  train(supp ~ ., data = ToothGrowth_regression_train,
+        method = "glmnet", metric = "Accuracy",
+        preProcess = c("center", "scale"), trControl = train_control)
+
+```
+
+#### Display the model's details
+
+```{r Your 16th Code Chunk}
+print(ToothGrowth_caret_model_glmnet)
+
+```
+
+#### Make predictions
+
+```{r Your 17th Code Chunk}
+predictions <- predict(ToothGrowth_caret_model_glmnet,
+                       ToothGrowth_regression_test[, 1:3])
+predictions <- factor(predictions, levels = levels(ToothGrowth_regression_test$supp))
+
+```
+
+#### Display the model's evaluation metrics
+```{r Your 18th Code Chunk}
+confusion_matrix <-
+  caret::confusionMatrix(predictions,
+                         ToothGrowth_regression_test$supp)
+print(confusion_matrix)
+
+fourfoldplot(as.table(confusion_matrix), color = c("grey", "lightblue"),
+             main = "Confusion Matrix")
+```
+
+## 3. Logistic Regression 
+### 3.a. Logistic Regression without caret 
+#### Load and split the dataset
+```{r Your 19th Code Chunk}
+data(ToothGrowth)
+
+```
+
+####Split the dataset into training and testing
+70% of the datset is used for training and 30% is used for testing
+
+```{r Your 20th Code Chunk}
+train_index <- createDataPartition(ToothGrowth$supp,
+                                   p = 0.7,
+                                   list = FALSE)
+ToothGrowth_logistic_train <- ToothGrowth[train_index, ]
+ToothGrowth_logistic_test <- ToothGrowth[-train_index, ]
+
+```
+
+#### Train the model 
+```{r Your 21th Code Chunk}
+ToothGrowth_logistic_model_glm <- glm(supp ~ ., data = ToothGrowth_logistic_train,
+                                 family = binomial(link = "logit"))
+
+```
+
+#### Display the model's details
+ 
+```{r Your 22nd Code Chunk}
+print(ToothGrowth_logistic_model_glm)
+ 
+```
+
+#### Make predictions
+```{r Your 23rd Code Chunk}
+probabilities <- predict(ToothGrowth_logistic_model_glm, ToothGrowth_logistic_test[, 1:3],
+                         type = "response")
+print(probabilities)
+predictions <- ifelse(probabilities > 0.5, "OJ" ,"VC")
+print(predictions)
+
+```
+
+#### Display the model's evaluation metrics 
+```{r Your 24th Code Chunk}
+table(predictions, ToothGrowth_logistic_test$supp)
+
+```
+
+### 3.b. Logistic Regression with caret 
+#### Load and split the dataset
+We load the ToothGrowth dataset which is inbuilt
+
+```{r Your 25th Code Chunk}
+data(ToothGrowth)
+
+```
+
+#### Split the dataset into training and testing
+70% of the dataset is used for training and the remaining 30% of used for testing
+
+```{r Your 26th Code Chunk}
+train_index <- createDataPartition(ToothGrowth$supp,
+                                   p = 0.7,
+                                   list = FALSE)
+ToothGrowth_logisticb_train <- ToothGrowth[train_index, ]
+ToothGrowth_logisticb_test <- ToothGrowth[-train_index, ]
+
+```
+
+#### Train the model
+We apply the 5-fold cross validation resampling method
+set.seed(7) ensures we have the same set of values
+We can use "regLogistic" instead of "glm"
+Notice the data transformation applied when we call the train function
+in caret, i.e., a standardize data transform (centre + scale)
+```{r Your 27th Code Chunk}
+train_control <- trainControl(method = "cv", number = 5)
+
+set.seed(7)
+ToothGrowth_caret_model_logistic <-
+  train(supp ~ ., data = ToothGrowth_logisticb_train,
+        method = "regLogistic", metric = "Accuracy",
+        preProcess = c("center", "scale"), trControl = train_control)
+
+```
+
+#### Display the model's details
+```{r Your 28th Code Chunk}
+print(ToothGrowth_caret_model_logistic)
+
+```
+
+#### Make predictions
+```{r Your 29th Code Chunk}
+predictions <- predict(ToothGrowth_caret_model_logistic,
+                       ToothGrowth_logisticb_test[, 1:3])
+
+```
+
+#### Display the model's evaluation metrics 
+```{r Your 30th Code Chunk}
+confusion_matrix <-
+  caret::confusionMatrix(predictions,
+                         ToothGrowth_logisticb_test[, 1:2]$supp)
+print(confusion_matrix)
+
+fourfoldplot(as.table(confusion_matrix), color = c("grey", "lightblue"),
+             main = "Confusion Matrix")
+
+
+```
+
+# B. Non-Linear Algorithms 
+## 1.  Classification and Regression Trees 
+### 1.a. Decision tree for a classification problem without caret 
+#### Load and split the dataset 
+```{r Your 31st Code Chunk}
+data(ToothGrowth)
+
+```
+
+####Split the datset into training and testing
+```{r Your 32nd Code Chunk}
+train_index <- createDataPartition(ToothGrowth$supp,
+                                   p = 0.7,
+                                   list = FALSE)
+ToothGrowth_train <- ToothGrowth[train_index, ]
+ToothGrowth_test <- ToothGrowth[-train_index, ]
+
+```
+
+#### Train the model
+```{r Your 33rd Code Chunk}
+ToothGrowth_model_rpart <- rpart(supp ~ ., data = ToothGrowth_train)
+
+```
+
+#### Display the model's details
+```{r Your 34th Code Chunk}
+print(ToothGrowth_model_rpart)
+
+```
+
+#### Make predictions
+```{r Your 35th Code Chunk}
+predictions <- predict(ToothGrowth_model_rpart,
+                       ToothGrowth_test[, 1:3],
+                       type = "class")
+
+```
+
+
+#### Display the model's evaluation metrics
+```{r Your 36th Code Chunk}
+table(predictions, ToothGrowth_test$supp)
+
+confusion_matrix <-
+  caret::confusionMatrix(predictions,
+                         ToothGrowth_test[, 1:3]$supp)
+print(confusion_matrix)
+
+fourfoldplot(as.table(confusion_matrix), color = c("grey", "lightblue"),
+             main = "Confusion Matrix")
+```
+
+### 1.b. Decision tree for a classification problem with caret 
+#### Load and split the dataset
+
+```{r Your 37th Code Chunk}
+data(ToothGrowth)
+
+```
+
+####Split the dataset into training and testing
+70% of the dataset is used for training and the remaining 30% is used for testing
+```{r Your 38th Code Chunk}
+train_index <- createDataPartition(ToothGrowth$supp,
+                                   p = 0.7,
+                                   list = FALSE)
+ToothGrowth_train <- ToothGrowth[train_index, ]
+ToothGrowth_test <- ToothGrowth[-train_index, ]
+
+```
+
+#### Train the model
+ We apply the 5-fold cross validation resampling method
+ 
+```{r Your 39th Code Chunk}
+set.seed(7)
+
+train_control <- trainControl(method = "cv", number = 5)
+ToothGrowth_caret_model_rpart <- train(supp ~ ., data = ToothGrowth,
+                                  method = "rpart", metric = "Accuracy",
+                                  trControl = train_control)
+
+```
+
+#### Display the model's details
+```{r Your 40th Code Chunk}
+print(ToothGrowth_caret_model_rpart)
+
+```
+
+#### Make predictions
+```{r Your 41st Code Chunk}
+predictions <- predict(ToothGrowth_model_rpart,
+                       ToothGrowth_test[, 1:3],
+                       type = "class")
+
+
+```
+
+#### Display the model's evaluation metrics 
+```{r Your 42nd Code Chunk}
+table(predictions, ToothGrowth_test$supp)
+
+confusion_matrix <-
+  caret::confusionMatrix(predictions,
+                         ToothGrowth_test[, 1:3]$supp)
+print(confusion_matrix)
+
+fourfoldplot(as.table(confusion_matrix), color = c("grey", "lightblue"),
+             main = "Confusion Matrix")
+
+```
+
+
+## 2.  Naïve Bayes 
+### 2.a. Naïve Bayes Classifier for a Classification Problem without CARET 
+#### Load and split the dataset
+```{r Your 43rd Code Chunk}
+data(ToothGrowth)
+
+```
+
+####Split the dataset into training and testing
+70% of the dataset is used for training and the remaining 30% is used for testing
+
+```{r Your 44th Code Chunk}
+train_index <- createDataPartition(ToothGrowth$supp,
+                                   p = 0.7,
+                                   list = FALSE)
+ToothGrowth_train <- ToothGrowth[train_index, ]
+ToothGrowth_test <- ToothGrowth[-train_index, ]
+
+```
+
+#### Train the model 
+We apply the 5-fold cross validation resampling method
+
+```{r Your 45th Code Chunk}
+set.seed(7)
+train_control <- trainControl(method = "cv", number = 5)
+ToothGrowth_caret_model_nb <- train(supp ~ .,
+                               data = ToothGrowth_train,
+                               method = "nb", metric = "Accuracy",
+                               trControl = train_control)
+
+```
+
+#### Display the model's details 
+```{r Your 46th Code Chunk}
+print(ToothGrowth_caret_model_nb)
+
+```
+
+#### Make predictions
+```{r Your 47th Code Chunk}
+predictions <- predict(ToothGrowth_caret_model_nb,
+                       ToothGrowth_test[, 1:3])
+
+```
+
+#### Display the model's evaluation metrics
+```{r Your 48th Code Chunk}
+confusion_matrix <-
+  caret::confusionMatrix(predictions,
+                         ToothGrowth_test[, 1:3]$supp)
+print(confusion_matrix)
+
+fourfoldplot(as.table(confusion_matrix), color = c("grey", "lightblue"),
+             main = "Confusion Matrix")
+```
+
+## 3.  k-Nearest Neighbours 
+### 3.a. kNN for a classification problem without CARET's train function 
+#### Load and split the dataset
+
+```{r Your 49th Code Chunk}
+data(ToothGrowth)
+
+```
+
+#### Split the dataset into training and testing
+
+```{r Your 50th Code Chunk}
+train_index <- createDataPartition(ToothGrowth$supp,
+                                   p = 0.7,
+                                   list = FALSE)
+ToothGrowth_train <- ToothGrowth[train_index, ]
+ToothGrowth_test <- ToothGrowth[-train_index, ]
+```
+
+#### Train the model
+```{r Your 51st Code Chunk}
+ToothGrowth_caret_model_knn <- knn3(supp ~ ., data = ToothGrowth_train, k=3)
+
+```
+
+#### Display the model's details 
+```{r Your 52nd Code Chunk}
+print(ToothGrowth_caret_model_knn)
+
+
+```
+
+#### Make predictions
+```{r Your 53rd Code Chunk}
+predictions <- predict(ToothGrowth_caret_model_knn,
+                       ToothGrowth_test[, 1:3],
+                       type = "class")
+
+
+
+```
+
+#### Display the model's evaluation metrics 
+```{r Your 54th Code Chunk}
+table(predictions, ToothGrowth_test$supp)
+
+
+```
+
+### 3.b. kNN for a classification problem with CARET's train function 
+#### Load and split the dataset
+
+```{r Your 55th Code Chunk}
+data(ToothGrowth)
+
+```
+
+####Split the dataset into training and testing
+```{r Your 56th Code Chunk}
+train_index <- createDataPartition(ToothGrowth$supp,
+                                   p = 0.7,
+                                   list = FALSE)
+ToothGrowth_train <- ToothGrowth[train_index, ]
+ToothGrowth_test <- ToothGrowth[-train_index, ]
+
+```
+
+#### Train the model
+```{r Your 57th Code Chunk}
+set.seed(7)
+train_control <- trainControl(method = "cv", number = 10)
+ToothGrowth_caret_model_knn <- train(supp ~ ., data = ToothGrowth,
+                                method = "knn", metric = "Accuracy",
+                                preProcess = c("center", "scale"),
+                                trControl = train_control)
+
+```
+
+#### Display the model's details
+
+```{r Your 58th Code Chunk}
+print(ToothGrowth_caret_model_knn)
+
+```
+
+#### Make predictions
+
+```{r Your 59th Code Chunk}
+predictions <- predict(ToothGrowth_caret_model_knn,
+                       ToothGrowth_test[, 1:3])
+
+```
+
+#### Display the model's evaluation metrics
+
+```{r Your 60th Code Chunk}
+confusion_matrix <-
+  caret::confusionMatrix(predictions,
+                         ToothGrowth_test[, 1:2]$supp)
+print(confusion_matrix)
+
+fourfoldplot(as.table(confusion_matrix), color = c("grey", "lightblue"),
+             main = "Confusion Matrix")
+```
+
+
+## 4.  Support Vector Machine 
+### 4.a. SVM Classifier for a classification problem without CARET 
+#### Load and split the dataset
+
+```{r Your 61st Code Chunk}
+data(ToothGrowth)
+
+```
+
+####Split the dataset into training and testing
+```{r Your 62nd Code Chunk}
+train_index <- createDataPartition(ToothGrowth$supp,
+                                   p = 0.7,
+                                   list = FALSE)
+ToothGrowth_train <- ToothGrowth[train_index, ]
+ToothGrowth_test <- ToothGrowth[-train_index, ]
+
+```
+
+#### Train the model
+```{r Your 63rd Code Chunk}
+ToothGrowth_model_svm <- ksvm(supp ~ ., data = ToothGrowth_train,
+                         kernel = "rbfdot")
+
+```
+
+#### Display the model's details
+```{r Your 64thCode Chunk}
+print(ToothGrowth_model_svm)
+
+```
+
+#### Make predictions
+```{r Your 65th Code Chunk}
+predictions <- predict(ToothGrowth_model_svm, ToothGrowth_test[, 1:3],
+                       type = "response")
+
+```
+
+#### Display the model's evaluation metrics
+```{r Your 66th Code Chunk}
+table(predictions, ToothGrowth_test$supp)
+
+confusion_matrix <-
+  caret::confusionMatrix(predictions,
+                         ToothGrowth_test[, 1:3]$supp)
+print(confusion_matrix)
+
+fourfoldplot(as.table(confusion_matrix), color = c("grey", "lightblue"),
+             main = "Confusion Matrix")
+```
+
+
+### 4.b. SVM Classifier for a classification problem with CARET ----
+#### Load and split the dataset
+```{r Your 67th Code Chunk}
+data(ToothGrowth)
+```
+
+
+####Split the dataset into training and testing
+```{r Your 68th Code Chunk}
+train_index <- createDataPartition(ToothGrowth$supp,
+                                   p = 0.7,
+                                   list = FALSE)
+ToothGrowth_train <- ToothGrowth[train_index, ]
+ToothGrowth_test <- ToothGrowth[-train_index, ]
+
+```
+
+#### Train the model
+```{r Your 69th Code Chunk}
+
+set.seed(7)
+train_control <- trainControl(method = "cv", number = 5)
+ToothGrowth_caret_model_svm_radial <- # nolint: object_length_linter.
+  train(supp ~ ., data = ToothGrowth_train, method = "svmRadial",
+        metric = "Accuracy", trControl = train_control)
+
+```
+
+#### Display the model's details
+```{r Your 70th Code Chunk}
+print(ToothGrowth_caret_model_svm_radial)
+
+
+```
+
+#### Make predictions
+```{r Your 71st Code Chunk}
+predictions <- predict(ToothGrowth_caret_model_svm_radial,
+                       ToothGrowth_test[, 1:3])
+
+
+```
+
+#### Display the model's evaluation metrics
+```{r Your 72nd Code Chunk}
+table(predictions, ToothGrowth_test$supp)
+
+confusion_matrix <-
+  caret::confusionMatrix(predictions,
+                         ToothGrowth_test[, 1:3]$supp)
+print(confusion_matrix)
+
+fourfoldplot(as.table(confusion_matrix), color = c("grey", "lightblue"),
+             main = "Confusion Matrix")
+
+```
+
