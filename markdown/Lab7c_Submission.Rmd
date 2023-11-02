@@ -1,0 +1,400 @@
+---
+title: "Business Intelligence Project"
+author: "Team Champions"
+date: "| Date:30/10/2023"
+output:
+  github_document: 
+    toc: yes
+    toc_depth: 4
+    fig_width: 6
+    fig_height: 4
+    df_print: default
+editor_options:
+  chunk_output_type: console
+---
+
+# Student Details
+
+|                                              |                  |
+|----------------------------------------------|------------------|
+| **Student ID Number**                        | 126761           |
+|                                              | 134111           |
+|                                              | 133996           |
+|                                              | 127707           |
+|                                              | 135859           |
+| **Student Name**                             | Virginia Wanjiru |
+|                                              | Immaculate Haayo |
+|                                              | Trevor Ngugi     |
+|                                              | Clarice Muthoni  |
+|                                              | Pauline Wairimu  |
+| **BBIT 4.2 Group**                           | B                |
+| **BI Project Group Name/ID (if applicable)** | Champions        |
+
+# Setup Chunk
+
+**Note:** the following KnitR options have been set as the global defaults: <BR> `knitr::opts_chunk$set(echo = TRUE, warning = FALSE, eval = TRUE, collapse = FALSE, tidy = TRUE)`.
+
+More KnitR options are documented here <https://bookdown.org/yihui/rmarkdown-cookbook/chunk-options.html> and here <https://yihui.org/knitr/options/>.
+
+```{r setup, include=FALSE}
+library(formatR)
+knitr::opts_chunk$set(
+  warning = FALSE,
+  collapse = FALSE
+)
+
+
+# STEP 1. Install and Load the Required Packages ----
+## stats ----
+if (require("stats")) {
+  require("stats")
+} else {
+  install.packages("stats", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## mlbench ----
+if (require("mlbench")) {
+  require("mlbench")
+} else {
+  install.packages("mlbench", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## caret ----
+if (require("caret")) {
+  require("caret")
+} else {
+  install.packages("caret", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## MASS ----
+if (require("MASS")) {
+  require("MASS")
+} else {
+  install.packages("MASS", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## glmnet ----
+if (require("glmnet")) {
+  require("glmnet")
+} else {
+  install.packages("glmnet", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## e1071 ----
+if (require("e1071")) {
+  require("e1071")
+} else {
+  install.packages("e1071", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## kernlab ----
+if (require("kernlab")) {
+  require("kernlab")
+} else {
+  install.packages("kernlab", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## rpart ----
+if (require("rpart")) {
+  require("rpart")
+} else {
+  install.packages("rpart", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+```
+
+# Understanding the Structure of Data     
+
+## Loading the Dataset
+
+### Source:
+
+The dataset that was used can be downloaded here: <https://www.kaggle.com/datasets/heeraldedhia/groceries-dataset>
+
+### Reference:
+
+*\
+Refer to the APA 7th edition manual for rules on how to cite datasets: <https://apastyle.apa.org/style-grammar-guidelines/references/examples/data-set-references>*
+
+# Association 
+# STEP 1. Install and Load the Required Packages ---- association
+```{r Carrying out association}
+## arules ----
+if (require("arules")) {
+  require("arules")
+} else {
+  install.packages("arules", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## arulesViz ----
+if (require("arulesViz")) {
+  require("arulesViz")
+} else {
+  install.packages("arulesViz", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## tidyverse ----
+if (require("tidyverse")) {
+  require("tidyverse")
+} else {
+  install.packages("tidyverse", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## readxl ----
+if (require("readxl")) {
+  require("readxl")
+} else {
+  install.packages("readxl", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## knitr ----
+if (require("knitr")) {
+  require("knitr")
+} else {
+  install.packages("knitr", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## ggplot2 ----
+if (require("ggplot2")) {
+  require("ggplot2")
+} else {
+  install.packages("ggplot2", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## lubridate ----
+if (require("lubridate")) {
+  require("lubridate")
+} else {
+  install.packages("lubridate", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## plyr ----
+if (require("plyr")) {
+  require("plyr")
+} else {
+  install.packages("plyr", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## dplyr ----
+if (require("dplyr")) {
+  require("dplyr")
+} else {
+  install.packages("dplyr", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## naniar ----
+if (require("naniar")) {
+  require("naniar")
+} else {
+  install.packages("naniar", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## RColorBrewer ----
+if (require("RColorBrewer")) {
+  require("RColorBrewer")
+} else {
+  install.packages("RColorBrewer", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+
+
+```
+
+# STEP 2. Load and pre-process the dataset
+```{r Code 2}
+library(readr)
+Groceries_dataset <- read_csv("../data/Groceries_dataset.csv")
+dim(Groceries_dataset)
+
+### Handle missing values ----
+# Are there missing values in the dataset?
+any_na(Groceries_dataset)
+
+## Identify categorical variables ----
+str(Groceries_dataset)
+head(Groceries_dataset)
+
+# We can separate the date and the time into 2 different variables.
+Groceries_dataset <-
+  Groceries_dataset %>%
+  mutate_all(~str_replace_all(., ",", " "))
+
+## check the column types
+str(Groceries_dataset)
+
+```
+
+## Create a transaction data frame using the "basket format"
+```{r Code 3}
+# ddply is used to split a data frame, apply a function to the split data,
+# and then return the result back in a data frame.
+grocerie_data <-
+  plyr::ddply(Groceries_dataset,
+              c("Member_number", "Date"),
+              function(df1) {
+                paste(df1$itemDescription, collapse = ",")
+              }
+  )
+View(grocerie_data)
+
+## Record only the `items` variable 
+grocerie_data <-
+  grocerie_data %>%
+  dplyr::select("items" = V1)
+View(grocerie_data)
+
+## Save the transactions in CSV format 
+write.csv(grocerie_data,
+          "../data/grocerie_basket_format.csv",
+          quote = FALSE, row.names = FALSE)
+
+```
+
+## Read the transactions fromm the CSV file 
+```{r Code 4}
+# We can now, finally, read the basket format transaction data as a
+# transaction object.
+tr_grocery <-
+  read.transactions("../data/grocerie_basket_format.csv",
+                    format = "basket",
+                    header = TRUE,
+                    rm.duplicates = TRUE,
+                    sep = ","
+  )
+
+# This shows there are 14963 transactions that have been identified
+# and 167 items
+print(tr_grocery)
+summary(tr_grocery)
+
+```
+
+##  Basic EDA 
+```{r Code 5}
+# Create an item frequency plot for the top 10 items
+
+
+
+```
+
+# STEP 3. Create the association rules 
+```{r Code 6}
+# The default action is to create rules with a minimum support of 0.1
+# and a minimum confidence of 0.8. These parameters can be adjusted (lowered)
+# if the algorithm does not lead to the creation of any rules.
+# We also set maxlen = 10 which refers to the maximum number of items per
+# item set.
+association_rules <- apriori(tr_grocery,
+                             parameter = list(support = 0.0001,
+                                              confidence = 0.8,
+                                              maxlen = 10))
+```
+
+## Print the association rules 
+Threshold values of support = 0.0001, confidence = 0.8, and maxlen = 10 results in a total of 647 rules when using the
+item name to identify the products.
+```{r Code 7}
+
+summary(association_rules)
+inspect(association_rules)
+
+```
+
+### To view the top 10 rules
+```{r Code 15}
+
+inspect(association_rules[1:10])
+plot(association_rules)
+
+```
+
+
+## Remove redundant rules 
+We can remove the redundant rules as follows:
+```{r Code 8}
+subset_rules <-
+  which(colSums(is.subset(association_rules,
+                          association_rules)) > 1)
+length(subset_rules)
+association_rules_no_reps <- association_rules[-subset_rules]
+
+# This results in 240 non-redundant rules (instead of the initial 647 rules)
+summary(association_rules_no_reps)
+inspect(association_rules_no_reps)
+
+write(association_rules_no_reps,
+      file = "../rules/association_rules_based_on_grocery_item.csv")
+```
+
+# STEP 4. Find specific rules 
+ Which product(s), if bought, result in a customer purchasing
+ "yogurt"?
+```{r Code 9}
+
+yogurt_association_rules <- # nolint
+  apriori(tr_grocery, parameter = list(supp = 0.0001, conf = 0.2),
+          appearance = list(default = "lhs",
+                            rhs = "yogurt"))
+inspect(head(yogurt_association_rules))
+
+```
+
+ Which product(s) are bought if a customer purchases
+ "pasta,pip fruit"?
+```{r Code 10}
+
+pasta_pip_fruit_association_rules <- # nolint
+  apriori(tr_grocery, parameter = list(supp = 0.0001, conf = 0.2),
+          appearance = list(lhs = c("pasta", "pip fruit"), # nolint
+                            default = "rhs"))
+inspect(head(pasta_pip_fruit_association_rules))
+
+```
+
+# STEP 5. Visualize the rules 
+```{r Code 11}
+# Filter rules with confidence greater than 0.25 or 25%
+rules_to_plot <-
+  association_rules_no_reps[quality(association_rules_no_reps)$confidence > 0.25] # nolint
+
+#Plot SubRules
+plot(rules_to_plot)
+
+```
+
+```{r Code 12}
+top_10_rules_to_plot <- head(rules_to_plot, n = 10, by = "confidence")
+
+
+```
+
+## Filter top 20 rules with highest lift
+```{r Code 13}
+rules_to_plot_by_lift <- head(rules_to_plot, n = 20, by = "lift")
+plot(rules_to_plot_by_lift, method = "paracoord")
+
+```
+
+```{r Code 14}
+plot(top_10_rules_to_plot, method = "grouped")
+
+```
+
